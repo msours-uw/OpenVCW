@@ -4,7 +4,7 @@
 #include "MatrixUtilities.h"
 #include <execution>
 
-namespace Vcr
+namespace Vcw
 {
 	class VirtualCamera
 	{

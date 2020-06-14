@@ -11,7 +11,7 @@ int Test()
 	const cv::Point2d cameraFocalLength(3570.8487771614123, 3570.5813860875437);
 	const std::vector<double> cameraDistortionCoefficients(std::vector<double>({ -0.3184124974828117 , 0.1655891487212314, -0.00017802041075148632, 0.00017411575646864198, -0.056445932029310308 }));
 
-    Vcr::VirtualCamera virtualCamera(cameraResolution, cameraPrincipalPoint, cameraFocalLength, cameraDistortionCoefficients);
+    Vcw::VirtualCamera virtualCamera(cameraResolution, cameraPrincipalPoint, cameraFocalLength, cameraDistortionCoefficients);
 
 	const cv::Mat &PropImage = cv::imread("P.png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 
@@ -21,7 +21,7 @@ int Test()
 
 	const cv::Size2d propSize(propWidth, propHeight);
 
-    const cv::Affine3d &Room_T_Prop = Vcr::MatrixUtilities::CreateTransform(3 * 0.0872664625997165, 2 * 0.0872664625997165, 2 * 0.0872664625997165, 5.8, -8.4, propDepth);
+    const cv::Affine3d &Room_T_Prop = Vcw::MatrixUtilities::CreateTransform(3 * 0.0872664625997165, 2 * 0.0872664625997165, 2 * 0.0872664625997165, 5.8, -8.4, propDepth);
 
 	const cv::Mat &cameraPerspective = virtualCamera.ComputeCameraPerspectiveOfProp(PropImage, Room_T_Prop, propSize);
 

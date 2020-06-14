@@ -1,7 +1,7 @@
 
 #include "MatrixUtilities.h"
 
-namespace Vcr
+namespace Vcw
 {
 	byte MatrixUtilities::BilinearInterpolate(const cv::Mat &Image, const cv::Point2d &Probe)
 	{
