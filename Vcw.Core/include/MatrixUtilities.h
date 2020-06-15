@@ -6,7 +6,7 @@
 
 typedef unsigned char byte;
 
-namespace Vcr
+namespace Vcw
 {
 	class MatrixUtilities final
 	{

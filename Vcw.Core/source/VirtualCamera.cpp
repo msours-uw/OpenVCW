@@ -1,7 +1,7 @@
 
 #include "VirtualCamera.h"
 
-namespace Vcr
+namespace Vcw
 {
 	VirtualCamera::VirtualCamera(const cv::Size &Resolution, const cv::Point2d &PrincipalPoint, const cv::Point2d &FocalLength, const std::vector<double> &DistortionCoefficients, const cv::Affine3d &Room_T_Camera)
 		: Resolution(Resolution), PrincipalPoint(PrincipalPoint), FocalLength(FocalLength), DistortionCoefficients(DistortionCoefficients)
