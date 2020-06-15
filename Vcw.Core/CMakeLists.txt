@@ -34,11 +34,22 @@ set_property (TARGET ${project_name}
     CXX_STANDARD 17
 )
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
+	    message(FATAL_ERROR "A compiler that fully supports C++17 is required to build this project ... ") 
+	endif()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(MSVC_VERSION VERSION_LESS 1900)
+    	message(FATAL_ERROR "A compiler that fully supports C++17 is required to build this project ... ") 
+	endif()
+endif()
+
 FIND_PACKAGE(OpenCV REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 
 #Install
 
+# For Windows, won't find .dll file extension elsewhere
 file(GLOB depends_dll ${OpenCV_DIR}/x64/vc15/bin/*.dll )
 
 install(TARGETS ${project_name}
