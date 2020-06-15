@@ -23,7 +23,7 @@ int Test()
 
     const cv::Affine3d &Room_T_Prop = Vcw::MatrixUtilities::CreateTransform(3 * 0.0872664625997165, 2 * 0.0872664625997165, 2 * 0.0872664625997165, 5.8, -8.4, propDepth);
 
-	const cv::Mat &cameraPerspective = virtualCamera.ComputeCameraPerspectiveOfProp(PropImage, Room_T_Prop, propSize);
+    const cv::Mat &cameraPerspective = virtualCamera.ComputeCameraPerspectiveOfProp(Vcw::VirtualProp(PropImage, propSize, Room_T_Prop));
 
 	cv::imwrite("Test.png", cameraPerspective);
 

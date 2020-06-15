@@ -8,6 +8,7 @@ namespace Vcw
     class VirtualWorld
     {
         public:
+
             VirtualWorld() {}
             VirtualWorld(const std::vector<VirtualCamera> &VirtualCameras);
 
@@ -21,6 +22,7 @@ namespace Vcw
             std::vector<VirtualCamera> VirtualCameras;
 
         private:
+
             int MaxCameraID = -1;
     };
 }

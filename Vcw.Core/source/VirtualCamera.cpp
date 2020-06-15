@@ -46,16 +46,17 @@ namespace Vcw
 		return cv::Point2d(FocalLength.x * x_distorted + PrincipalPoint.x, FocalLength.y * y_distorted + PrincipalPoint.y);
 	}
 
-	cv::Mat VirtualCamera::ComputeCameraPerspectiveOfProp(const cv::Mat &PropImage, const cv::Affine3d &Room_T_Prop, const cv::Size2d &PropSize_m) const 
+    cv::Mat VirtualCamera::ComputeCameraPerspectiveOfProp(const VirtualProp &virtualProp) const
 	{
-		const cv::Affine3d &Camera_T_Prop = this->Room_T_Camera.inv() * Room_T_Prop;
+        const cv::Affine3d &Camera_T_Prop = this->Room_T_Camera.inv() * virtualProp.Room_T_Prop;
 
 		const cv::Affine3d::Mat3 Prop_R_Camera = Camera_T_Prop.inv().linear();
 		const cv::Vec3d Prop_t_Camera = Camera_T_Prop.inv().translation();
 
-		const cv::Size propImageSize(PropImage.size());
+        const cv::Mat &PropImage = virtualProp.Image;
+        const cv::Size propImageSize(PropImage.size());
 
-		const cv::Point2d propScale(static_cast<double>(propImageSize.width) / PropSize_m.width, static_cast<double>(propImageSize.height) / PropSize_m.height);
+        const cv::Point2d propScale(static_cast<double>(propImageSize.width) / virtualProp.PropSize_m.width, static_cast<double>(propImageSize.height) / virtualProp.PropSize_m.height);
 		const cv::Point2d propPrincipalPoint((static_cast<double>(propImageSize.width) - 1.0) / 2.0, (static_cast<double>(propImageSize.height) - 1.0) / 2.0);
 
 		cv::Mat CameraPerspective = cv::Mat::zeros(this->Resolution.height, this->Resolution.width, CV_8UC1);
@@ -63,9 +64,9 @@ namespace Vcw
 		std::vector<int> IterationsX, IterationsY;
 		ComputePerspectiveIterationRange(propImageSize, propScale, Camera_T_Prop, IterationsX, IterationsY);
 
-		std::for_each(std::execution::par_unseq, IterationsY.begin(), IterationsY.end(), [IterationsX, Prop_R_Camera, Prop_t_Camera, propPrincipalPoint, propScale, &CameraPerspective, propImageSize, PropImage, this](auto&& y)
+        std::for_each(std::execution::par_unseq, IterationsY.begin(), IterationsY.end(), [IterationsX, Prop_R_Camera, Prop_t_Camera, propPrincipalPoint, propScale, &CameraPerspective, propImageSize, PropImage, this](auto&& y)
 		{
-			std::for_each(std::execution::par_unseq, IterationsX.begin(), IterationsX.end(), [y, Prop_R_Camera, Prop_t_Camera, propPrincipalPoint, propScale, &CameraPerspective, propImageSize, PropImage, this](auto&& x)
+            std::for_each(std::execution::par_unseq, IterationsX.begin(), IterationsX.end(), [y, Prop_R_Camera, Prop_t_Camera, propPrincipalPoint, propScale, &CameraPerspective, propImageSize, PropImage, this](auto&& x)
 			{
 				const cv::Point2d &cameraNormalizedDirection = this->UndistortPoint(cv::Point2d(x, y));
 				
@@ -79,7 +80,7 @@ namespace Vcw
 
 				if (p_prop_pixel.x <= -0.5 || p_prop_pixel.x >= propImageSize.width - 0.5 || p_prop_pixel.y <= -0.5 || p_prop_pixel.y >= propImageSize.height - 0.5) return;
 
-				CameraPerspective.at<uchar>(y, x) = MatrixUtilities::BilinearInterpolate(PropImage, p_prop_pixel);
+                CameraPerspective.at<uchar>(y, x) = MatrixUtilities::BilinearInterpolate(PropImage, p_prop_pixel);
 			});
 		});
 		

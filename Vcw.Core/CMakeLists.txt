@@ -22,8 +22,9 @@ file(GLOB_RECURSE Library_HEADERS
 )
 
 add_library(${project_name} STATIC
-	./source/VirtualCamera.cpp
 	./source/MatrixUtilities.cpp
+	./source/VirtualCamera.cpp
+	./source/VirtualProp.cpp
 	./source/VirtualWorld.cpp
 	
 	${Library_HEADERS}
