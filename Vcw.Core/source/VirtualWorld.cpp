@@ -7,7 +7,7 @@ namespace Vcw
     {
         int k = -1;
         for(k = 0; k < VirtualCameras.size(); k++) this->VirtualCameras[k].ID = k;
-        this->MaxCameraID = k;
+        this->MaxCameraID = this->VirtualCameras.back().ID;
     }
     void VirtualWorld::AddCamera(const VirtualCamera &virtualCamera)
     {
