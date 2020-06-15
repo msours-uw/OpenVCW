@@ -33,3 +33,6 @@
 
 # Build directory
 build/*
+
+# Created by qtcreator
+CMakeLists.txt.user
