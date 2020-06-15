@@ -24,6 +24,7 @@ file(GLOB_RECURSE Library_HEADERS
 add_library(${project_name} STATIC
 	./source/VirtualCamera.cpp
 	./source/MatrixUtilities.cpp
+	./source/VirtualWorld.cpp
 	
 	${Library_HEADERS}
 )
@@ -34,6 +35,7 @@ set_property (TARGET ${project_name}
     CXX_STANDARD 17
 )
 
+# Assert compiler supports C++17
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
 	    message(FATAL_ERROR "A compiler that fully supports C++17 is required to build this project ... ") 

@@ -3,12 +3,21 @@
 
 namespace Vcw
 {
-	VirtualCamera::VirtualCamera(const cv::Size &Resolution, const cv::Point2d &PrincipalPoint, const cv::Point2d &FocalLength, const std::vector<double> &DistortionCoefficients, const cv::Affine3d &Room_T_Camera)
-		: Resolution(Resolution), PrincipalPoint(PrincipalPoint), FocalLength(FocalLength), DistortionCoefficients(DistortionCoefficients)
+    VirtualCamera::VirtualCamera(const cv::Size &Resolution, const cv::Point2d &PrincipalPoint, const cv::Point2d &FocalLength, const std::vector<double> &DistortionCoefficients, const cv::Affine3d &Room_T_Camera, const int ID)
+        : Resolution(Resolution), PrincipalPoint(PrincipalPoint), FocalLength(FocalLength), DistortionCoefficients(DistortionCoefficients), Room_T_Camera(Room_T_Camera), ID(ID)
 	{
-		this->Room_T_Camera = Room_T_Camera;
 		this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(FocalLength.x, 0, PrincipalPoint.x, 0, FocalLength.y, PrincipalPoint.y, 0, 0, 1));
 	}
+    VirtualCamera::VirtualCamera(const VirtualCamera &virtualCamera)
+    {
+        this->ID = virtualCamera.ID;
+        this->Resolution = virtualCamera.Resolution;
+        this->PrincipalPoint = virtualCamera.PrincipalPoint;
+        this->FocalLength = virtualCamera.FocalLength;
+        this->DistortionCoefficients = virtualCamera.DistortionCoefficients;
+        this->Room_T_Camera = virtualCamera.Room_T_Camera;
+        this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(FocalLength.x, 0, PrincipalPoint.x, 0, FocalLength.y, PrincipalPoint.y, 0, 0, 1));
+    }
 
 	cv::Point2d VirtualCamera::UndistortPoint(const cv::Point2d &Point, bool KeepAsDirection) const
 	{
