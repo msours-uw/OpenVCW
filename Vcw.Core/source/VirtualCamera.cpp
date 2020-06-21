@@ -130,6 +130,9 @@ namespace Vcw
 		const cv::Range RangeX(cv::max(0, (int)floor(minX->x)), cv::min(Resolution.width - 1, (int)ceil(maxX->x)));
 		const cv::Range RangeY(cv::max(0, (int)floor(minY->y)), cv::min(Resolution.height - 1, (int)ceil(maxY->y)));
 
+        if(RangeX.size() < 0) return;
+        if(RangeY.size() < 0) return;
+
 		OutIterationsX = std::vector<int>(RangeX.size() + 1);
 		OutIterationsY = std::vector<int>(RangeY.size() + 1);
 
