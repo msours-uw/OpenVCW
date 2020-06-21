@@ -14,7 +14,7 @@ namespace Vcw
 
 		static byte BilinearInterpolate(const cv::Mat &Image, const cv::Point2d &Probe);
 
-		static cv::Affine3d CreateTransform(const double Rx, const double Ry, const double Rz, const double Tx, const double Ty, const double Tz);
+        static cv::Affine3d CreateAffineTransform(const double Rx, const double Ry, const double Rz, const double Tx, const double Ty, const double Tz);
 
         static cv::Point2d Normalize(const cv::Point3d &Point);
 
