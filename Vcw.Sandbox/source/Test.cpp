@@ -110,14 +110,11 @@ int TestMultipleCameraPerspectives()
 int main()
 {
 
-    Vcw::UniformDistribution uniformDistribution;
+    Vcw::NormalDistribution ND(0.0, 1.0);
 
-    const std::vector<double> &V = uniformDistribution.GenerateDouble(1000);
+    std::vector<double> N = ND.GenerateDouble(1000);
 
-    for(int k=0;k< V.size();k++)
-    {
-        std::cout << V[k] << "\n";
-    }
+    for(int k=0; k< N.size(); k++) std::cout << N[k] << "\n";
 
 	return 0;
 }
