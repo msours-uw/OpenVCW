@@ -1,5 +1,6 @@
 
 #include "DistributionProfiles.h"
+#include <iostream>
 
 namespace Vcw
 {
@@ -13,12 +14,21 @@ namespace Vcw
 
     Uint64 UniformDistribution::GenerateUint64() {return GenerateUint64_(); }
 
+    int UniformDistribution::GenerateInt() {return (int)GenerateUint64_(); }
+
     double UniformDistribution::GenerateDouble() {return GenerateDouble_(); }
 
     std::vector<Uint64> UniformDistribution::GenerateArrayUint64(size_t N)
     {
         std::vector<Uint64> V;
         for(int k=0; k< N;k++) V.push_back(GenerateUint64());
+
+        return V;
+    }
+    std::vector<int> UniformDistribution::GenerateArrayInt(size_t N)
+    {
+        std::vector<int> V;
+        for(int k=0; k< N;k++) V.push_back(GenerateInt());
 
         return V;
     }
@@ -75,4 +85,96 @@ namespace Vcw
             return Mean + Sigma * fac;
         }
     }
+
+    // Poisson Distribution
+    PoissonDistribution::PoissonDistribution(const double Lambda) : UniformDistribution(), Lambda(Lambda), logfact(std::vector<double>(1024, -1.0)), lambold(-1.0) {}
+    PoissonDistribution::PoissonDistribution(const double Lambda, const Uint32 Seed) : UniformDistribution(Seed), Lambda(Lambda), logfact(std::vector<double>(1024, -1.0)), lambold(-1.0) {}
+
+    int PoissonDistribution::GenerateInt()
+    {
+        double u, u2, v, v2, p, t, lfac;
+        int K;
+
+        if(Lambda < 5.0)
+        {
+            if (Lambda != lambold) lamexp = exp(-Lambda);
+
+            K = -1;
+            t = 1.0;
+
+            do
+            {
+                ++K;
+                t *= GenerateDouble_();
+            }
+            while(t > lamexp);
+        }
+        else
+        {
+            if(Lambda != lambold)
+            {
+                sqlam = sqrt(Lambda);
+                loglam = log(Lambda);
+            }
+            for(;;)
+            {
+                u = 0.64 * GenerateDouble_();
+                v = -0.68 + 1.28 * GenerateDouble_();
+
+                if(Lambda > 13.5)
+                {
+                    v2 = v * v;
+                    if (v >= 0.0) {if (v2 > 6.5 * u * (0.64-u) * (u + 0.2)) continue;}
+                    else {if (v2 > 9.6 * u * (0.66 - u) * (u + 0.07)) continue;}
+                }
+
+                K = (int)(std::floor(sqlam*(v/u)+Lambda+0.5));
+
+                if(K < 0) continue;
+
+                u2 = u * u;
+
+                if (Lambda > 13.5)
+                {
+                    if (v >= 0.0) {if (v2 < 15.2 * u2 * (0.61-u) * (0.8-u)) break;}
+                    else {if (v2 < 6.76 * u2 * (0.62-u)*(1.4-u)) break; }
+                }
+
+                if (K < 1024)
+                {
+                    if (logfact[K] < 0.0) logfact[K] = LnGamma(K + 1.0);
+                    lfac = logfact[K];
+                }
+                else lfac = LnGamma(K + 1.0);
+
+                p = sqlam * exp(-Lambda + K * loglam - lfac);
+
+                if (u2 < p) break;
+
+            }
+        }
+
+        lambold = Lambda;
+        return K;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

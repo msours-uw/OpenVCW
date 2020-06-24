@@ -110,9 +110,9 @@ int TestMultipleCameraPerspectives()
 int main()
 {
 
-    Vcw::NormalDistribution ND(0.0, 1.0);
+    Vcw::PoissonDistribution PD(12);
 
-    std::vector<double> N = ND.GenerateArrayDouble(1000);
+    std::vector<int> N = PD.GenerateArrayInt(1000);
 
     for(int k=0; k< N.size(); k++) std::cout << N[k] << "\n";
 
