@@ -2,7 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "DistributionGenerator.h"
+#include "DistributionProfiles.h"
 #include "VirtualWorld.h"
 
 const double ArcminToRads = 0.000290888;
@@ -112,7 +112,7 @@ int main()
 
     Vcw::NormalDistribution ND(0.0, 1.0);
 
-    std::vector<double> N = ND.GenerateDouble(1000);
+    std::vector<double> N = ND.GenerateArrayDouble(1000);
 
     for(int k=0; k< N.size(); k++) std::cout << N[k] << "\n";
 

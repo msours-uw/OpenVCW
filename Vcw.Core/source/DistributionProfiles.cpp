@@ -1,5 +1,5 @@
 
-#include "DistributionGenerator.h"
+#include "DistributionProfiles.h"
 
 namespace Vcw
 {
@@ -13,9 +13,9 @@ namespace Vcw
 
     Uint64 UniformDistribution::GenerateUint64() {return GenerateUint64_(); }
 
-    double UniformDistribution::GenerateDouble() {return GenerateUint64_(); }
+    double UniformDistribution::GenerateDouble() {return GenerateDouble_(); }
 
-    std::vector<Uint64> UniformDistribution::GenerateUint64(size_t N)
+    std::vector<Uint64> UniformDistribution::GenerateArrayUint64(size_t N)
     {
         std::vector<Uint64> V;
         for(int k=0; k< N;k++) V.push_back(GenerateUint64());
@@ -23,7 +23,7 @@ namespace Vcw
         return V;
     }
 
-    std::vector<double> UniformDistribution::GenerateDouble(size_t N)
+    std::vector<double> UniformDistribution::GenerateArrayDouble(size_t N)
     {
         std::vector<double> V;
         for(int k=0; k< N;k++) V.push_back(GenerateDouble());
@@ -74,13 +74,5 @@ namespace Vcw
             s0 = 0.0;
             return Mean + Sigma * fac;
         }
-    }
-
-    std::vector<double> NormalDistribution::GenerateDouble(size_t N)
-    {
-        std::vector<double> V;
-        for(int k = 0; k < N; k++) V.push_back(GenerateDouble());
-
-        return V;
     }
 }

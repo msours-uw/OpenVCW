@@ -20,9 +20,9 @@ namespace Vcw
             virtual Uint64 GenerateUint64();
             virtual double GenerateDouble();
 
-            virtual std::vector<Uint64> GenerateUint64(size_t N);
+            std::vector<Uint64> GenerateArrayUint64(size_t N);
 
-            virtual std::vector<double> GenerateDouble(size_t N);
+            std::vector<double> GenerateArrayDouble(size_t N);
 
     protected:
 
@@ -43,8 +43,6 @@ namespace Vcw
         NormalDistribution(const double Mean, const double Sigma, const Uint32 Seed);
 
         double GenerateDouble();
-
-        std::vector<double> GenerateDouble(size_t N);
 
         const double Mean, Sigma;
 
