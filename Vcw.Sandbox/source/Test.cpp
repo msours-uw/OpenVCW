@@ -112,9 +112,11 @@ int main()
 
     Vcw::UniformDistribution uniformDistribution;
 
-    for(int k=0;k< 1000;k++)
+    const std::vector<double> &V = uniformDistribution.GenerateDouble(1000);
+
+    for(int k=0;k< V.size();k++)
     {
-        std::cout << uniformDistribution.GenerateDouble() << "\n";
+        std::cout << V[k] << "\n";
     }
 
 	return 0;
