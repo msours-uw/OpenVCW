@@ -78,10 +78,10 @@ namespace Vcw
 
     static inline double LnGamma(const double xx)
     {
-        if(xx <= 0.0) return std::numeric_limits<double>::quiet_NaN();
+        if(xx <= 0.0) return std::numeric_limits<double>::infinity();
 
         int j;
-        double x, tmp, y, ser;
+        double x, t, y, ser;
 
         static const double cof[14] = {57.1562356658629235,-59.5979603554754912,
                                        14.1360979747417471,-0.491913816097620199,.339946499848118887e-4,
@@ -90,11 +90,11 @@ namespace Vcw
                                        .844182239838527433e-4,-.261908384015814087e-4,.368991826595316234e-5};
 
         y=x=xx;
-        tmp = x+5.24218750000000000;
-        tmp = (x+0.5)*log(tmp)-tmp;
+        t = x+5.24218750000000000;
+        t = (x+0.5)*log(t)-t;
         ser = 0.999999999999997092;
         for (j=0;j<14;j++) ser += cof[j]/++y;
 
-        return tmp+log(2.5066282746310005*ser/x);
+        return t+log(2.5066282746310005*ser/x);
     }
 }

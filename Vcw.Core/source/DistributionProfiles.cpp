@@ -1,6 +1,5 @@
 
 #include "DistributionProfiles.h"
-#include <iostream>
 
 namespace Vcw
 {
