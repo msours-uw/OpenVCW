@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "DistributionGenerator.h"
 #include "VirtualWorld.h"
 
 const double ArcminToRads = 0.000290888;
@@ -108,7 +109,13 @@ int TestMultipleCameraPerspectives()
 
 int main()
 {
-    TestMultipleCameraPerspectives();
+
+    Vcw::UniformDistribution uniformDistribution;
+
+    for(int k=0;k< 1000;k++)
+    {
+        std::cout << uniformDistribution.GenerateDouble() << "\n";
+    }
 
 	return 0;
 }
