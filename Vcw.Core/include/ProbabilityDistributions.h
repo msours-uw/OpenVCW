@@ -20,14 +20,12 @@ namespace Vcw
             UniformDistribution(const Uint32 Seed = std::time(NULL));
 
             virtual int GenerateInt();
-            virtual Uint64 GenerateUint64();
             virtual double GenerateDouble();
-
-            std::vector<Uint64> GenerateArrayUint64(size_t N);
+            virtual float GenerateFloat();
 
             std::vector<int> GenerateArrayInt(size_t N);
-
             std::vector<double> GenerateArrayDouble(size_t N);
+            std::vector<float> GenerateArrayFloat(size_t N);
 
     protected:
 
@@ -48,6 +46,7 @@ namespace Vcw
         NormalDistribution(const double Mean, const double Sigma);
         NormalDistribution(const double Mean, const double Sigma, const Uint32 Seed);
 
+        int GenerateInt();
         double GenerateDouble();
 
         const double Mean, Sigma;
@@ -66,6 +65,7 @@ namespace Vcw
         PoissonDistribution(const double Lambda, const Uint32 Seed);
 
         int GenerateInt();
+        double GenerateDouble();
 
         double Lambda;
 

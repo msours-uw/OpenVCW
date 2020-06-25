@@ -11,19 +11,12 @@ namespace Vcw
         w = v; GenerateUint64_();
     }
 
-    Uint64 UniformDistribution::GenerateUint64() {return GenerateUint64_(); }
-
     int UniformDistribution::GenerateInt() {return (int)GenerateUint64_(); }
 
     double UniformDistribution::GenerateDouble() {return GenerateDouble_(); }
 
-    std::vector<Uint64> UniformDistribution::GenerateArrayUint64(size_t N)
-    {
-        std::vector<Uint64> V;
-        for(int k=0; k< N;k++) V.push_back(GenerateUint64());
+    float UniformDistribution::GenerateFloat() {return (float)GenerateDouble_(); }
 
-        return V;
-    }
     std::vector<int> UniformDistribution::GenerateArrayInt(size_t N)
     {
         std::vector<int> V;
@@ -32,13 +25,15 @@ namespace Vcw
         return V;
     }
 
-    std::vector<double> UniformDistribution::GenerateArrayDouble(size_t N)
+    std::vector<float> UniformDistribution::GenerateArrayFloat(size_t N)
     {
-        std::vector<double> V;
-        for(int k=0; k< N;k++) V.push_back(GenerateDouble());
+        std::vector<float> V;
+        for(int k=0; k< N;k++) V.push_back((float)GenerateDouble());
 
         return V;
     }
+
+    std::vector<float> GenerateArrayFloat(size_t N);
 
     Uint64 UniformDistribution::GenerateUint64_()
     {
@@ -84,6 +79,8 @@ namespace Vcw
             return Mean + Sigma * fac;
         }
     }
+
+    int NormalDistribution::GenerateInt(){ return (int)std::round(GenerateInt()); }
 
     // Poisson Distribution
     PoissonDistribution::PoissonDistribution(const double Lambda) : UniformDistribution(), Lambda(Lambda), logfact(std::vector<double>(1024, -1.0)), lambold(-1.0) {}
@@ -156,6 +153,8 @@ namespace Vcw
         lambold = Lambda;
         return K;
     }
+
+    double PoissonDistribution::GenerateDouble(){return (double)GenerateInt(); }
 }
 
 

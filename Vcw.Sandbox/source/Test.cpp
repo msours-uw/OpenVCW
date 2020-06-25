@@ -30,11 +30,13 @@ int TestMultipleCameraPerspectives()
     //Bottom Right Camera
     const cv::Affine3d &Room_T_Camera3 = Vcw::MatrixUtilities::CreateAffineTransform(5.234 * ArcminToRads, 605.869 * ArcminToRads, -0.830 * ArcminToRads, 0.052, 0.035, 0.0003);
 
+    const Vcw::CameraProperties cameraProperties(cameraResolution, cameraPrincipalPoint, cameraFocalLength, cameraDistortionCoefficients);
+
     // Position four cameras within the world, all with reference to the same point. All cameras are set to have the same intrinsic parameters
-    virtualWorld.AddCamera(Vcw::VirtualCamera(cameraResolution, cameraPrincipalPoint, cameraFocalLength, cameraDistortionCoefficients, Room_T_Camera0));
-    virtualWorld.AddCamera(Vcw::VirtualCamera(cameraResolution, cameraPrincipalPoint, cameraFocalLength, cameraDistortionCoefficients, Room_T_Camera1));
-    virtualWorld.AddCamera(Vcw::VirtualCamera(cameraResolution, cameraPrincipalPoint, cameraFocalLength, cameraDistortionCoefficients, Room_T_Camera2));
-    virtualWorld.AddCamera(Vcw::VirtualCamera(cameraResolution, cameraPrincipalPoint, cameraFocalLength, cameraDistortionCoefficients, Room_T_Camera3));
+    virtualWorld.AddCamera(Vcw::VirtualCamera(cameraProperties, Room_T_Camera0));
+    virtualWorld.AddCamera(Vcw::VirtualCamera(cameraProperties, Room_T_Camera1));
+    virtualWorld.AddCamera(Vcw::VirtualCamera(cameraProperties, Room_T_Camera2));
+    virtualWorld.AddCamera(Vcw::VirtualCamera(cameraProperties, Room_T_Camera3));
 
     const cv::Mat &PropImage = cv::imread("CharucoGrid.png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 
@@ -109,12 +111,7 @@ int TestMultipleCameraPerspectives()
 
 int main()
 {
-
-    Vcw::PoissonDistribution PD(12);
-
-    std::vector<int> N = PD.GenerateArrayInt(1000);
-
-    for(int k=0; k< N.size(); k++) std::cout << N[k] << "\n";
+    TestMultipleCameraPerspectives();
 
 	return 0;
 }
