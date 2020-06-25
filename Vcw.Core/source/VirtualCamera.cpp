@@ -8,6 +8,7 @@ namespace Vcw
 	{
 		this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(FocalLength.x, 0, PrincipalPoint.x, 0, FocalLength.y, PrincipalPoint.y, 0, 0, 1));
 	}
+
     VirtualCamera::VirtualCamera(const VirtualCamera &virtualCamera)
     {
         this->ID = virtualCamera.ID;

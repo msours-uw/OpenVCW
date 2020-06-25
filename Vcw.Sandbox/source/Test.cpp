@@ -2,7 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "DistributionProfiles.h"
+#include "ProbabilityDistributions.h"
 #include "VirtualWorld.h"
 
 const double ArcminToRads = 0.000290888;

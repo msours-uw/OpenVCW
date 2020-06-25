@@ -1,5 +1,5 @@
 
-#include "DistributionProfiles.h"
+#include "ProbabilityDistributions.h"
 
 namespace Vcw
 {
