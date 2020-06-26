@@ -26,7 +26,7 @@ add_library(${project_name} STATIC
 	./source/VirtualCamera.cpp
 	./source/VirtualProp.cpp
 	./source/VirtualWorld.cpp
-	
+        ./source/ProbabilityDistributions.cpp
 	${Library_HEADERS}
 )
 

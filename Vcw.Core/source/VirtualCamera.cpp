@@ -1,19 +1,28 @@
 
 #include "VirtualCamera.h"
+#include "ProbabilityDistributions.h"
 
 namespace Vcw
 {
-    VirtualCamera::VirtualCamera(const cv::Size &Resolution, const cv::Point2d &PrincipalPoint, const cv::Point2d &FocalLength, const std::vector<double> &DistortionCoefficients, const cv::Affine3d &Room_T_Camera, const int ID)
-        : Resolution(Resolution), PrincipalPoint(PrincipalPoint), FocalLength(FocalLength), DistortionCoefficients(DistortionCoefficients), Room_T_Camera(Room_T_Camera), ID(ID)
-	{
-		this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(FocalLength.x, 0, PrincipalPoint.x, 0, FocalLength.y, PrincipalPoint.y, 0, 0, 1));
+    VirtualCamera::VirtualCamera(const CameraProperties &cameraProperties, const cv::Affine3d &Room_T_Camera, const int ID)
+        : cameraProperties(cameraProperties), Room_T_Camera(Room_T_Camera), ID(ID)
+    {
+        this->BitDepth = cameraProperties.BitDepth;
+        this->Resolution = cameraProperties.Resolution;
+        this->PrincipalPoint = cameraProperties.PrincipalPoint;
+        this->FocalLength = cameraProperties.FocalLength;
+        this->DistortionCoefficients = cameraProperties.DistortionCoefficients;
+        this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(FocalLength.x, 0, PrincipalPoint.x, 0, FocalLength.y, PrincipalPoint.y, 0, 0, 1));
 	}
+
     VirtualCamera::VirtualCamera(const VirtualCamera &virtualCamera)
     {
         this->ID = virtualCamera.ID;
-        this->Resolution = virtualCamera.Resolution;
-        this->PrincipalPoint = virtualCamera.PrincipalPoint;
-        this->FocalLength = virtualCamera.FocalLength;
+        this->cameraProperties = virtualCamera.cameraProperties;
+        this->BitDepth = virtualCamera.cameraProperties.BitDepth;
+        this->Resolution = virtualCamera.cameraProperties.Resolution;
+        this->PrincipalPoint = virtualCamera.cameraProperties.PrincipalPoint;
+        this->FocalLength = virtualCamera.cameraProperties.FocalLength;
         this->DistortionCoefficients = virtualCamera.DistortionCoefficients;
         this->Room_T_Camera = virtualCamera.Room_T_Camera;
         this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(FocalLength.x, 0, PrincipalPoint.x, 0, FocalLength.y, PrincipalPoint.y, 0, 0, 1));
@@ -46,7 +55,7 @@ namespace Vcw
 		return cv::Point2d(FocalLength.x * x_distorted + PrincipalPoint.x, FocalLength.y * y_distorted + PrincipalPoint.y);
 	}
 
-    cv::Mat VirtualCamera::ComputeCameraPerspectiveOfProp(const VirtualProp &virtualProp) const
+    cv::Mat VirtualCamera::ComputeCameraPerspectiveOfProp(const VirtualProp &virtualProp, const bool AddCameraNoise) const
 	{
         const cv::Affine3d &Camera_T_Prop = this->Room_T_Camera.inv() * virtualProp.Room_T_Prop;
 
@@ -80,12 +89,58 @@ namespace Vcw
 
 				if (p_prop_pixel.x <= -0.5 || p_prop_pixel.x >= propImageSize.width - 0.5 || p_prop_pixel.y <= -0.5 || p_prop_pixel.y >= propImageSize.height - 0.5) return;
 
+                // Currently only supports projection of 8 bit prop image.
                 CameraPerspective.at<uchar>(y, x) = MatrixUtilities::BilinearInterpolate(PropImage, p_prop_pixel);
 			});
 		});
+
+        if(!AddCameraNoise) return CameraPerspective;
 		
-		return CameraPerspective;
+        return SimulateCameraNoise(CameraPerspective);
 	}
+
+    cv::Mat VirtualCamera::SimulateCameraNoise(const cv::Mat &Image) const
+    {
+        cv::Mat ImageF;
+        Image.convertTo(ImageF, CV_32F);
+
+        PoissonDistribution poissonDistribution(cameraProperties.PhotonsPerPixel);
+        NormalDistribution normalDistribution(0.0, cameraProperties.TemporalDarkNoise);
+
+        cv::Mat ShotNoise(ImageF.rows, ImageF.cols, CV_32F);
+        cv::Mat GaussianNoise(ImageF.rows, ImageF.cols, CV_32F);
+
+        const std::vector<float> &shotNoise = poissonDistribution.GenerateArrayFloat(ImageF.rows * ImageF.cols);
+        memcpy(ShotNoise.data, shotNoise.data(), shotNoise.size() * sizeof(float));
+
+        const std::vector<float> &gaussianNoise = normalDistribution.GenerateArrayFloat(ImageF.rows * ImageF.cols);
+        memcpy(GaussianNoise.data, gaussianNoise.data(), gaussianNoise.size() * sizeof(float));
+
+        ShotNoise *= cameraProperties.QuantumEfficiency;
+
+        cv::Mat TotalNoise = (GaussianNoise + ShotNoise) * cameraProperties.PhotonSensitivity + cameraProperties.IntensityBaseline;
+
+        // Only supports 8 or 16 bit images;
+        const int imageBitDepth = Image.depth() == 0 || Image.depth() == 1 ? 8 : 16;
+
+        const float ScaleFactor = (pow(2.0, imageBitDepth) - 1.0) / (pow(2.0, cameraProperties.BitDepth) - 1.0);
+
+        TotalNoise *= ScaleFactor;
+
+        double Min, Max0;
+        cv::minMaxLoc(ImageF, &Min, &Max0);
+
+        ImageF += TotalNoise;
+
+        double Max1;
+        cv::minMaxLoc(ImageF, &Min, &Max1);
+
+        // Keep the same max intensity from before adding the noise
+        cv::Mat ImageWithNoise;
+        ImageF.convertTo(ImageWithNoise, Image.type(), Max0 / Max1);
+
+        return ImageWithNoise;
+    }
 
 	void VirtualCamera::ComputePerspectiveIterationRange(const cv::Size &PropImageSize, const cv::Point2d &PropScale, const cv::Affine3d &Camera_T_Prop, std::vector<int> &OutIterationsX, std::vector<int> &OutIterationsY) const
 	{
@@ -129,6 +184,9 @@ namespace Vcw
 
 		const cv::Range RangeX(cv::max(0, (int)floor(minX->x)), cv::min(Resolution.width - 1, (int)ceil(maxX->x)));
 		const cv::Range RangeY(cv::max(0, (int)floor(minY->y)), cv::min(Resolution.height - 1, (int)ceil(maxY->y)));
+
+        if(RangeX.size() < 0) return;
+        if(RangeY.size() < 0) return;
 
 		OutIterationsX = std::vector<int>(RangeX.size() + 1);
 		OutIterationsY = std::vector<int>(RangeY.size() + 1);

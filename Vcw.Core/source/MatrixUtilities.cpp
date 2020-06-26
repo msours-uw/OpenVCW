@@ -26,7 +26,7 @@ namespace Vcw
 		return static_cast<byte>(std::round(v_tl * (1.0 - w_bottom) * (1.0 - w_right) + v_tr * (1.0 - w_bottom) * w_right + v_bl * w_bottom * (1.0 - w_right) + v_br * w_bottom * w_right));
 	}
 
-	cv::Affine3d MatrixUtilities::CreateTransform(const double Rx, const double Ry, const double Rz, const double Tx, const double Ty, const double Tz)
+    cv::Affine3d MatrixUtilities::CreateAffineTransform(const double Rx, const double Ry, const double Rz, const double Tx, const double Ty, const double Tz)
 	{
 		cv::Affine3d T = cv::Affine3d::Identity();
 		T.matrix(0, 0) = cos(Ry) * cos(Rz);
