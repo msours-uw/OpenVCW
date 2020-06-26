@@ -40,53 +40,93 @@ int TestMultipleCameraPerspectives()
 
     const cv::Mat &PropImage = cv::imread("CharucoGrid.png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 
-    const double propDistance = 0.6;
     const double propWidth = 0.75;
     const double propHeight = 0.75;
 
     const cv::Size2d propSize(propWidth, propHeight);
 
+    double propDistance = 0.5;
+
     // Describe the motion of the prop with reference to the world
     std::vector<cv::Affine3d> Room_T_Props;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, -20.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, -15.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, -10.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, -5.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, 0, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, 5.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, 10.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, 15.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, 20.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-20.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-15.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-10.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-5.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(0.0, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(5.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(10.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(15.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance += 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, 25.0 * DegToRads, 0, 0, 0, propDistance));
+
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, 20.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, 15.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, 10.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, 5.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, 0.0, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, -5.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, -10.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, -15.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, -20.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(25.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(20.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(15.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(10.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(5.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(0.0, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-5.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-10.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-15.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+    propDistance -= 0.02;
     Room_T_Props.push_back(Vcw::MatrixUtilities::CreateAffineTransform(-20.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance));
+
 
     for(int k=0; k< Room_T_Props.size(); k++)
     {

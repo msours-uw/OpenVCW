@@ -156,23 +156,3 @@ namespace Vcw
 
     double PoissonDistribution::GenerateDouble(){return (double)GenerateInt(); }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

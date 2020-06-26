@@ -135,6 +135,7 @@ namespace Vcw
         double Max1;
         cv::minMaxLoc(ImageF, &Min, &Max1);
 
+        // Keep the same max intensity from before adding the noise
         cv::Mat ImageWithNoise;
         ImageF.convertTo(ImageWithNoise, Image.type(), Max0 / Max1);
 
