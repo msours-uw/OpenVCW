@@ -125,7 +125,7 @@ int TestMultipleCameraPerspectives()
     virtualWorld.AddCamera(Vcw::VirtualCamera(cameraProperties, Room_T_Camera2));
     virtualWorld.AddCamera(Vcw::VirtualCamera(cameraProperties, Room_T_Camera3));
 
-    const cv::Mat &PropImage = cv::imread("CharucoGrid.png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH) + cv::Mat::ones(960, 960, CV_8UC1);
+    const cv::Mat &PropImage = cv::imread("CharucoGrid.png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 
     const double propWidth = 0.75;
     const double propHeight = 0.75;
