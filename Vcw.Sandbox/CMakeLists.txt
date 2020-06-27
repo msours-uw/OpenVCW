@@ -35,10 +35,12 @@ target_link_libraries(${PROJECT_NAME} Vcw.Core)
 
 file(GLOB depends_dll ${OpenCV_DIR}/x64/vc15/bin/*.dll)
 
+file(GLOB resources ./resources/*.png)
+
 install(TARGETS ${project_name}
 	DESTINATION ${project_name}/bin
 )
 
-install (FILES ${depends_dll}
+install (FILES ${depends_dll} ${resources}
     DESTINATION ${project_name}/bin
 )

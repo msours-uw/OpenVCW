@@ -7,35 +7,25 @@ namespace Vcw
     VirtualCamera::VirtualCamera(const CameraProperties &cameraProperties, const cv::Affine3d &Room_T_Camera, const int ID)
         : cameraProperties(cameraProperties), Room_T_Camera(Room_T_Camera), ID(ID)
     {
-        this->BitDepth = cameraProperties.BitDepth;
-        this->Resolution = cameraProperties.Resolution;
-        this->PrincipalPoint = cameraProperties.PrincipalPoint;
-        this->FocalLength = cameraProperties.FocalLength;
-        this->DistortionCoefficients = cameraProperties.DistortionCoefficients;
-        this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(FocalLength.x, 0, PrincipalPoint.x, 0, FocalLength.y, PrincipalPoint.y, 0, 0, 1));
+        this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(cameraProperties.FocalLength.x, 0, cameraProperties.PrincipalPoint.x, 0, cameraProperties.FocalLength.y, cameraProperties.PrincipalPoint.y, 0, 0, 1));
 	}
 
     VirtualCamera::VirtualCamera(const VirtualCamera &virtualCamera)
     {
         this->ID = virtualCamera.ID;
         this->cameraProperties = virtualCamera.cameraProperties;
-        this->BitDepth = virtualCamera.cameraProperties.BitDepth;
-        this->Resolution = virtualCamera.cameraProperties.Resolution;
-        this->PrincipalPoint = virtualCamera.cameraProperties.PrincipalPoint;
-        this->FocalLength = virtualCamera.cameraProperties.FocalLength;
-        this->DistortionCoefficients = virtualCamera.DistortionCoefficients;
         this->Room_T_Camera = virtualCamera.Room_T_Camera;
-        this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(FocalLength.x, 0, PrincipalPoint.x, 0, FocalLength.y, PrincipalPoint.y, 0, 0, 1));
+        this->CameraMatrix = cv::Mat_<double>(cv::Matx33d(cameraProperties.FocalLength.x, 0, cameraProperties.PrincipalPoint.x, 0, cameraProperties.FocalLength.y, cameraProperties.PrincipalPoint.y, 0, 0, 1));
     }
 
 	cv::Point2d VirtualCamera::UndistortPoint(const cv::Point2d &Point, bool KeepAsDirection) const
 	{
 		std::vector<cv::Point2d> undistortedPoints;
-		cv::undistortPoints(std::vector<cv::Point2d>({ Point }), undistortedPoints, CameraMatrix, DistortionCoefficients);
+        cv::undistortPoints(std::vector<cv::Point2d>({ Point }), undistortedPoints, CameraMatrix, cameraProperties.DistortionCoefficients);
 
 		if (KeepAsDirection) return undistortedPoints[0];
 
-		return cv::Point2d(undistortedPoints[0].x * FocalLength.x + PrincipalPoint.x, undistortedPoints[0].y * FocalLength.y + PrincipalPoint.y);
+        return cv::Point2d(undistortedPoints[0].x * cameraProperties.FocalLength.x + cameraProperties.PrincipalPoint.x, undistortedPoints[0].y * cameraProperties.FocalLength.y + cameraProperties.PrincipalPoint.y);
 	}
 
 	cv::Point2d VirtualCamera::DistortPoint(const cv::Point3d &Point) const
@@ -43,16 +33,16 @@ namespace Vcw
 		const cv::Point2d normalizedPoint(Point.x / Point.z, Point.y / Point.z);
 
 		const double r_2 = pow(normalizedPoint.x, 2.0) + pow(normalizedPoint.y, 2.0);
-		const double k1 = DistortionCoefficients[0];
-		const double k2 = DistortionCoefficients[1];
-		const double p1 = DistortionCoefficients[2];
-		const double p2 = DistortionCoefficients[3];
-		const double k3 = DistortionCoefficients[4];
+        const double k1 = cameraProperties.DistortionCoefficients[0];
+        const double k2 = cameraProperties.DistortionCoefficients[1];
+        const double p1 = cameraProperties.DistortionCoefficients[2];
+        const double p2 = cameraProperties.DistortionCoefficients[3];
+        const double k3 = cameraProperties.DistortionCoefficients[4];
 
 		const double x_distorted = normalizedPoint.x * (1.0 + k1 * r_2 + k2 * pow(r_2, 2.0) + k3 * pow(r_2, 3.0)) + 2.0 * p1 * normalizedPoint.x * normalizedPoint.y + p2 * (r_2 + 2 * pow(normalizedPoint.x, 2.0));
 		const double y_distorted = normalizedPoint.y * (1.0 + k1 * r_2 + k2 * pow(r_2, 2.0) + k3 * pow(r_2, 3.0)) + 2.0 * p2 * normalizedPoint.x * normalizedPoint.y + p1 * (r_2 + 2 * pow(normalizedPoint.y, 2.0));
 
-		return cv::Point2d(FocalLength.x * x_distorted + PrincipalPoint.x, FocalLength.y * y_distorted + PrincipalPoint.y);
+        return cv::Point2d(cameraProperties.FocalLength.x * x_distorted + cameraProperties.PrincipalPoint.x, cameraProperties.FocalLength.y * y_distorted + cameraProperties.PrincipalPoint.y);
 	}
 
     cv::Mat VirtualCamera::ComputeCameraPerspectiveOfProp(const VirtualProp &virtualProp, const bool AddCameraNoise) const
@@ -68,7 +58,7 @@ namespace Vcw
         const cv::Point2d propScale(static_cast<double>(propImageSize.width) / virtualProp.PropSize_m.width, static_cast<double>(propImageSize.height) / virtualProp.PropSize_m.height);
 		const cv::Point2d propPrincipalPoint((static_cast<double>(propImageSize.width) - 1.0) / 2.0, (static_cast<double>(propImageSize.height) - 1.0) / 2.0);
 
-		cv::Mat CameraPerspective = cv::Mat::zeros(this->Resolution.height, this->Resolution.width, CV_8UC1);
+        cv::Mat CameraPerspective = cv::Mat::zeros(cameraProperties.Resolution.height, cameraProperties.Resolution.width, CV_8UC1);
 
 		std::vector<int> IterationsX, IterationsY;
 		ComputePerspectiveIterationRange(propImageSize, propScale, Camera_T_Prop, IterationsX, IterationsY);
@@ -182,8 +172,8 @@ namespace Vcw
 		std::tie(minX, maxX) = std::minmax_element(begin(cameraPerspectiveLimits), std::end(cameraPerspectiveLimits), [](cv::Point2d const& p0, cv::Point2d const& p1) {return p0.x < p1.x; });
 		std::tie(minY, maxY) = std::minmax_element(begin(cameraPerspectiveLimits), std::end(cameraPerspectiveLimits), [](cv::Point2d const& p0, cv::Point2d const& p1) {return p0.y < p1.y; });
 
-		const cv::Range RangeX(cv::max(0, (int)floor(minX->x)), cv::min(Resolution.width - 1, (int)ceil(maxX->x)));
-		const cv::Range RangeY(cv::max(0, (int)floor(minY->y)), cv::min(Resolution.height - 1, (int)ceil(maxY->y)));
+        const cv::Range RangeX(cv::max(0, (int)floor(minX->x)), cv::min(cameraProperties.Resolution.width - 1, (int)ceil(maxX->x)));
+        const cv::Range RangeY(cv::max(0, (int)floor(minY->y)), cv::min(cameraProperties.Resolution.height - 1, (int)ceil(maxY->y)));
 
         if(RangeX.size() < 0) return;
         if(RangeY.size() < 0) return;
@@ -194,4 +184,25 @@ namespace Vcw
 		std::iota(std::begin(OutIterationsX), std::end(OutIterationsX), RangeX.start);
 		std::iota(std::begin(OutIterationsY), std::end(OutIterationsY), RangeY.start);
 	}
+
+    int VirtualCamera::BitDepth() const {return cameraProperties.BitDepth; }
+
+    int VirtualCamera::PhotonsPerPixel() const {return cameraProperties.PhotonsPerPixel; }
+
+    float VirtualCamera::QuantumEfficiency() const {return cameraProperties.QuantumEfficiency; }
+
+    float VirtualCamera::TemporalDarkNoise() const {return cameraProperties.TemporalDarkNoise; }
+
+    float VirtualCamera::PhotonSensitivity() const {return cameraProperties.PhotonSensitivity; }
+
+    uint32_t VirtualCamera::IntensityBaseline() const {return cameraProperties.IntensityBaseline; }
+
+    cv::Size VirtualCamera::Resolution() const {return cameraProperties.Resolution; }
+
+    cv::Point2d VirtualCamera::PrincipalPoint() const {return cameraProperties.PrincipalPoint; }
+
+    cv::Point2d VirtualCamera::FocalLength() const {return cameraProperties.FocalLength; }
+
+    std::vector<double> VirtualCamera::DistortionCoefficients() const {return cameraProperties.DistortionCoefficients; }
+
 }

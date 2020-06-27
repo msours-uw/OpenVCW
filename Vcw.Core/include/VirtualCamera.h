@@ -10,6 +10,7 @@ namespace Vcw
     struct CameraProperties
     {
             CameraProperties(){}
+
             // Initialize with some default values
             CameraProperties(const cv::Size &Resolution, const cv::Point2d &PrincipalPoint, const cv::Point2d &FocalLength, const std::vector<double> &DistortionCoefficients,
                              const int BitDepth = 12, const int PhotonsPerPixel = 500, const double QuantumEfficiency = 0.69, const double TemporalDarkNoise = 2.29, const double PhotonSensitivity = 5.88, const uint32_t IntensityBaseline = 100)
@@ -34,6 +35,7 @@ namespace Vcw
         public:
 
             VirtualCamera(){}
+
             VirtualCamera(const CameraProperties &cameraProperties, const cv::Affine3d &Room_T_Camera = cv::Affine3d::Identity(), const int ID = -1);
 
             VirtualCamera(const VirtualCamera &virtualCamera);
@@ -48,18 +50,23 @@ namespace Vcw
 
             int ID;
 
+            int BitDepth() const;
+            int PhotonsPerPixel() const;
+            float QuantumEfficiency() const;
+            float TemporalDarkNoise() const;
+            float PhotonSensitivity() const;
+            uint32_t IntensityBaseline() const;
+
+            cv::Size Resolution() const;
+            cv::Point2d PrincipalPoint() const;
+            cv::Point2d FocalLength() const;
+            std::vector<double> DistortionCoefficients() const;
+
         private:
 
-            void ComputePerspectiveIterationRange(const cv::Size &PropImageSize, const cv::Point2d &PropScale, const cv::Affine3d &Camera_T_Prop, std::vector<int> &OutIterationsX, std::vector<int> &OutIterationsY) const;
-
-
-            CameraProperties cameraProperties;
-            int BitDepth;
-
             cv::Mat_<double> CameraMatrix;
+            CameraProperties cameraProperties;
 
-            cv::Size Resolution;
-            cv::Point2d PrincipalPoint, FocalLength;
-            std::vector<double> DistortionCoefficients;
+            void ComputePerspectiveIterationRange(const cv::Size &PropImageSize, const cv::Point2d &PropScale, const cv::Affine3d &Camera_T_Prop, std::vector<int> &OutIterationsX, std::vector<int> &OutIterationsY) const;
     };
 }
