@@ -13,7 +13,7 @@ namespace Vcw
 
             // Initialize with some default values
             CameraProperties(const cv::Size &Resolution, const cv::Point2d &PrincipalPoint, const cv::Point2d &FocalLength, const std::vector<double> &DistortionCoefficients,
-                             const int BitDepth = 12, const int PhotonsPerPixel = 500, const double QuantumEfficiency = 0.69, const double TemporalDarkNoise = 2.29, const double PhotonSensitivity = 5.88, const uint32_t IntensityBaseline = 100)
+                             const int BitDepth = 12, const int PhotonsPerPixel = 300, const double QuantumEfficiency = 0.55, const double TemporalDarkNoise = 6.09, const double PhotonSensitivity = 5.88, const uint32_t IntensityBaseline = 43)
                 : Resolution(Resolution), PrincipalPoint(PrincipalPoint), FocalLength(FocalLength), DistortionCoefficients(DistortionCoefficients),
                   BitDepth(BitDepth), PhotonsPerPixel(PhotonsPerPixel), QuantumEfficiency(QuantumEfficiency), TemporalDarkNoise(TemporalDarkNoise), PhotonSensitivity(PhotonSensitivity), IntensityBaseline(IntensityBaseline) {}
 

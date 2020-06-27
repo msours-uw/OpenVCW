@@ -100,9 +100,9 @@ int TestMultipleCameraPerspectives()
 
     Vcw::VirtualWorld virtualWorld = Vcw::VirtualWorld();
 
-    const cv::Size cameraResolution(2000.0, 2000.0);
-    const cv::Point2d cameraPrincipalPoint(1004.22305051, 989.892016271);
-    const cv::Point2d cameraFocalLength(1785.29069304, 1785.42438858);
+    const cv::Size cameraResolution(1000.0, 1000.0);
+    const cv::Point2d cameraPrincipalPoint(502.111525255, 494.946008135);
+    const cv::Point2d cameraFocalLength(892.64534652, 892.71219429);
     const std::vector<double> cameraDistortionCoefficients(std::vector<double>({ -0.3184124974828117 , 0.1655891487212314, -0.00017802041075148632, 0.00017411575646864198, -0.056445932029310308 }));
 
     // Top Left Camera
