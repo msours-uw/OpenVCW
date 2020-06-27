@@ -67,6 +67,9 @@ namespace Vcw
         int GenerateInt();
         double GenerateDouble();
 
+        int GenerateInt(double Lambda);
+        double GenerateDouble(double Lambda);
+
         double Lambda;
 
     private:

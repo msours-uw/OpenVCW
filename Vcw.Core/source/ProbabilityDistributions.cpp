@@ -155,4 +155,16 @@ namespace Vcw
     }
 
     double PoissonDistribution::GenerateDouble(){return (double)GenerateInt(); }
+
+    double PoissonDistribution::GenerateDouble(const double Lambda)
+    {
+        this->Lambda = Lambda;
+        GenerateDouble();
+    }
+
+    int PoissonDistribution::GenerateInt(const double Lambda)
+    {
+        this->Lambda = Lambda;
+        GenerateInt();
+    }
 }

@@ -73,59 +73,88 @@ namespace Vcw
 				
                 const cv::Point2d &propRay = MatrixUtilities::Normalize(Prop_R_Camera * cameraRay);
 
-				const cv::Point2d p_prop(Prop_t_Camera[0] - propRay.x * Prop_t_Camera[2], Prop_t_Camera[1] - propRay.y * Prop_t_Camera[2]);
+                const cv::Point2d p_prop(Prop_t_Camera[0] - propRay.x * Prop_t_Camera[2], Prop_t_Camera[1] - propRay.y * Prop_t_Camera[2]);
 
-				const cv::Point2d p_prop_pixel(propPrincipalPoint.x + p_prop.x * propScale.x, propPrincipalPoint.y + p_prop.y * propScale.y);
+                const cv::Point2d p_prop_pixel(propPrincipalPoint.x + p_prop.x * propScale.x, propPrincipalPoint.y + p_prop.y * propScale.y);
 
-				if (p_prop_pixel.x <= -0.5 || p_prop_pixel.x >= propImageSize.width - 0.5 || p_prop_pixel.y <= -0.5 || p_prop_pixel.y >= propImageSize.height - 0.5) return;
+                if (p_prop_pixel.x <= -0.5 || p_prop_pixel.x >= propImageSize.width - 0.5 || p_prop_pixel.y <= -0.5 || p_prop_pixel.y >= propImageSize.height - 0.5) return;
 
                 // Currently only supports projection of 8 bit prop image.
                 CameraPerspective.at<uchar>(y, x) = MatrixUtilities::BilinearInterpolate(PropImage, p_prop_pixel);
-			});
-		});
+            });
+        });
 
         if(!AddCameraNoise) return CameraPerspective;
-		
+
         return SimulateCameraNoise(CameraPerspective);
-	}
+    }
 
     cv::Mat VirtualCamera::SimulateCameraNoise(const cv::Mat &Image) const
     {
-        cv::Mat ImageF;
-        Image.convertTo(ImageF, CV_32F);
+        double Min, Max0;
+        cv::minMaxLoc(Image, &Min, &Max0);
 
-        PoissonDistribution poissonDistribution(cameraProperties.PhotonsPerPixel);
-        NormalDistribution normalDistribution(0.0, cameraProperties.TemporalDarkNoise);
+        // Instead of actually computing number of photons for every pixel, we'll simplify the model by
+        // normalizing so that the max intensity is equal to the camera property for Photons/Pixel
+        // The intent is to have a poisson distribution that corresponds to intensity, and this can be acheived
+        // by tweaking Camera Properties until the desired affect is observed
 
-        cv::Mat ShotNoise(ImageF.rows, ImageF.cols, CV_32F);
-        cv::Mat GaussianNoise(ImageF.rows, ImageF.cols, CV_32F);
-
-        const std::vector<float> &shotNoise = poissonDistribution.GenerateArrayFloat(ImageF.rows * ImageF.cols);
-        memcpy(ShotNoise.data, shotNoise.data(), shotNoise.size() * sizeof(float));
-
-        const std::vector<float> &gaussianNoise = normalDistribution.GenerateArrayFloat(ImageF.rows * ImageF.cols);
-        memcpy(GaussianNoise.data, gaussianNoise.data(), gaussianNoise.size() * sizeof(float));
-
-        ShotNoise *= cameraProperties.QuantumEfficiency;
-
-        cv::Mat TotalNoise = (GaussianNoise + ShotNoise) * cameraProperties.PhotonSensitivity + cameraProperties.IntensityBaseline;
+        const double MaxIntensityToPhotonsPP = Max0 / cameraProperties.PhotonsPerPixel;
 
         // Only supports 8 or 16 bit images;
         const int imageBitDepth = Image.depth() == 0 || Image.depth() == 1 ? 8 : 16;
+
+        PoissonDistribution poissonDistribution(cameraProperties.PhotonsPerPixel);
+
+        std::vector<float> shotNoise(Image.rows * Image.cols);
+
+        if(imageBitDepth == 8)
+        {
+            for(int k=0;k< shotNoise.size();k++)
+            {
+                const double Lambda = Image.data[k] / MaxIntensityToPhotonsPP;
+                shotNoise[k] = (float)poissonDistribution.GenerateDouble(Lambda) * cameraProperties.QuantumEfficiency;
+            }
+        }
+        else
+        {
+            int j = 0;
+            for(int k = 0; k < shotNoise.size(); k++)
+            {
+                uint16_t Value = ((uint16_t)Image.data[j + 1] << 8) | ((uint16_t)Image.data[j]);
+
+                const double Lambda = Value / MaxIntensityToPhotonsPP;
+                shotNoise[k] = (float)poissonDistribution.GenerateDouble(Lambda) * cameraProperties.QuantumEfficiency;
+
+                j += 2;
+            }
+        }
+
+        NormalDistribution normalDistribution(0.0, cameraProperties.TemporalDarkNoise);
+
+        cv::Mat ShotNoise(Image.rows, Image.cols, CV_32F);
+        cv::Mat GaussianNoise(Image.rows, Image.cols, CV_32F);
+
+        memcpy(ShotNoise.data, shotNoise.data(), shotNoise.size() * sizeof(float));
+
+        const std::vector<float> &gaussianNoise = normalDistribution.GenerateArrayFloat(Image.rows * Image.cols);
+        memcpy(GaussianNoise.data, gaussianNoise.data(), gaussianNoise.size() * sizeof(float));
+
+        cv::Mat TotalNoise = (GaussianNoise + ShotNoise) * cameraProperties.PhotonSensitivity + cameraProperties.IntensityBaseline;
 
         const float ScaleFactor = (pow(2.0, imageBitDepth) - 1.0) / (pow(2.0, cameraProperties.BitDepth) - 1.0);
 
         TotalNoise *= ScaleFactor;
 
-        double Min, Max0;
-        cv::minMaxLoc(ImageF, &Min, &Max0);
+        cv::Mat ImageF;
+        Image.convertTo(ImageF, CV_32F);
 
         ImageF += TotalNoise;
 
         double Max1;
         cv::minMaxLoc(ImageF, &Min, &Max1);
 
-        // Keep the same max intensity from before adding the noise
+        // Normalize the image so that the max intensity from before adding image noise remains the max intensity
         cv::Mat ImageWithNoise;
         ImageF.convertTo(ImageWithNoise, Image.type(), Max0 / Max1);
 
