@@ -24,8 +24,7 @@ Provide a complete example for validating the "bundle adjustment" algorithm for 
 For image segmentation and object classification type problems, it can be heplful to have an unlimited source of target data when down selecting a particular convolutional network.
 
 # Simulating Model Specific Camera Noise
-shot noise (poisson distribution, intensity dependant) and gaussian noise (normal distribution, intensity independant) can be simulated in perspectives of a target by nitializing the camera model with parameters usually provided by the manufacturer:
-
+Shot Noise (poisson distribution, intensity dependant) and Gaussian Noise (normal distribution, intensity independant) can be simulated in perspectives of a target by initializing the camera model with parameters usually provided by the manufacturer:
 * Bit Depth
 * Photons Per Pixel
 * Quantum Efficienct
