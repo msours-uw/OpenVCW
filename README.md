@@ -1,4 +1,4 @@
-## OpenVCW - Open Source Library for Simulating Camera Perspectives of Real World Targets
+## Open Virtual Camera World
 Open Virtual Camera World allows any number of "virtual cameras" to be placed in a "virtual world", where each camera has it's own set of intrinsic parameters, as well as an orientation with reference to a single point in the world. A 2D "virtual target" (specified as an image) of some width and height in meters, and with some orientation with reference to the same point in the world, can then be observed by the cameras (projected using linear algebra based on the pin-hole camera model and bilinear interpolation). The result is an image of each cameras perspective of the scene containing the target. 
 
 In addition, shot noise and gaussian noise can optionally be introduced into each cameras perspective. This can be done by initializing the camera model with parameters usually provided by the manufacturer, or by tweaking the models default values until the desired effect is observed.
