@@ -16,7 +16,7 @@ Below is an example, placing four cameras each at different orientations with re
 ![Alt text](/Vcw.Sandbox/resources/CameraPerspectives.gif?raw=true "Charuco poses over time")
 
 TODO: 
-Provide a complete example for validating the "bundle adjustment" algorithm for estimating camera extrinsics, described here http://ceres-solver.org/nnls_tutorial.html#bundle-adjustment
+Provide a complete example for validating the "bundle adjustment" algorithm for estimating camera extrinsics, described [here](http://ceres-solver.org/nnls_tutorial.html#bundle-adjustment).
 
 #### Validating Deep Learning models for image processing applications
 For image segmentation and object classification type problems, it can be heplful to have an unlimited source of target data when down selecting a particular convolutional network.
@@ -25,7 +25,7 @@ For image segmentation and object classification type problems, it can be heplfu
 Shot Noise (poisson distribution, intensity dependant) and Gaussian Noise (normal distribution, intensity independant) can be simulated in perspectives of a target by initializing the camera model with parameters usually provided by the manufacturer:
 * Bit Depth
 * Photons Per Pixel
-* Quantum Efficienct
+* Quantum Efficiency
 * Temporal Dark Noise
 * Photon Sensitivity
 * Intensity Baseline.
@@ -36,10 +36,10 @@ Below is an example, adding quite an exaggerated amount of shot noise and gaussi
 
 ### Building and Installing
 Requirements:
-* OpenCV (tested with 3.4.6)
+* [OpenCV](https://opencv.org/releases/) (tested with 3.4.6)
 * Full C++17 support
 #### Linux
-GCC is the only compiler that has been tested on Linux. GCC 10 is the first GCC compiler to fully support C++17, which should already exist on newer Linux distributions, or at least be easily obtained. With older distributions such as Ubuntu 16.04, it may be neccesary to build GCC 10 from source: https://solarianprogrammer.com/2016/10/07/building-gcc-ubuntu-linux/
+GCC is the only compiler that has been tested on Linux. GCC 10 is the first GCC compiler to fully support C++17, which should already exist on newer Linux distributions, or at least be easily obtained. With older distributions such as Ubuntu 16.04, it may be neccesary to [build GCC 10 from source](https://solarianprogrammer.com/2016/10/07/building-gcc-ubuntu-linux/)
 
 After cloning the repo,
 * `mkdir build`
