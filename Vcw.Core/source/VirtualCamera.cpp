@@ -4,6 +4,7 @@
 
 namespace Vcw
 {
+
 	VirtualCamera::VirtualCamera(const CameraProperties &cameraProperties, const cv::Affine3d &Room_T_Camera, const int ID)
 		: cameraProperties(cameraProperties), Room_T_Camera(Room_T_Camera), ID(ID)
 	{
@@ -77,8 +78,7 @@ namespace Vcw
 
 				const cv::Point3d &cameraPoint = Camera_T_Prop * propPoint;
 
-				// Arbitrarily set the camera clipping plance to 100mm
-				if (cameraPoint.z <= 0.1) return;
+				if (cameraPoint.z <= this->ClippingPlane) return;
 
 				const cv::Point2d propPointPx(propPrincipalPoint.x + propPoint.x * propScale.x, propPrincipalPoint.y + propPoint.y * propScale.y);
 

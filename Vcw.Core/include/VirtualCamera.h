@@ -62,6 +62,9 @@ namespace Vcw
 		cv::Point2d FocalLength() const;
 		std::vector<double> DistortionCoefficients() const;
 
+		// Arbitrarily set clipping plane to 100 mm
+		double ClippingPlane = 0.1; 
+
 	private:
 
 		cv::Mat_<double> CameraMatrix;
