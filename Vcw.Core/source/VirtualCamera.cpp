@@ -40,56 +40,56 @@ namespace Vcw
 		const double k3 = cameraProperties.DistortionCoefficients[4];
 
 		const double x_distorted = normalizedPoint.x * (1.0 + k1 * r_2 + k2 * pow(r_2, 2.0) + k3 * pow(r_2, 3.0)) + 2.0 * p1 * normalizedPoint.x * normalizedPoint.y + p2 * (r_2 + 2 * pow(normalizedPoint.x, 2.0));
-        const double y_distorted = normalizedPoint.y * (1.0 + k1 * r_2 + k2 * pow(r_2, 2.0) + k3 * pow(r_2, 3.0)) + 2.0 * p2 * normalizedPoint.x * normalizedPoint.y + p1 * (r_2 + 2 * pow(normalizedPoint.y, 2.0));
+		const double y_distorted = normalizedPoint.y * (1.0 + k1 * r_2 + k2 * pow(r_2, 2.0) + k3 * pow(r_2, 3.0)) + 2.0 * p2 * normalizedPoint.x * normalizedPoint.y + p1 * (r_2 + 2 * pow(normalizedPoint.y, 2.0));
 
-        return cv::Point2d(cameraProperties.FocalLength.x * x_distorted + cameraProperties.PrincipalPoint.x, cameraProperties.FocalLength.y * y_distorted + cameraProperties.PrincipalPoint.y);
-    }
+		return cv::Point2d(cameraProperties.FocalLength.x * x_distorted + cameraProperties.PrincipalPoint.x, cameraProperties.FocalLength.y * y_distorted + cameraProperties.PrincipalPoint.y);
+	}
 
-    cv::Mat VirtualCamera::ComputeCameraPerspectiveOfProp(const VirtualProp &virtualProp, const bool AddCameraNoise) const
-    {
-        const cv::Affine3d &Camera_T_Prop = this->Room_T_Camera.inv() * virtualProp.Room_T_Prop;
+	cv::Mat VirtualCamera::ComputeCameraPerspectiveOfProp(const VirtualProp &virtualProp, const bool AddCameraNoise) const
+	{
+		const cv::Affine3d &Camera_T_Prop = this->Room_T_Camera.inv() * virtualProp.Room_T_Prop;
 
-        const cv::Affine3d::Mat3 &Prop_R_Camera = Camera_T_Prop.inv().linear();
-        const cv::Vec3d &Prop_t_Camera = Camera_T_Prop.inv().translation();
+		const cv::Affine3d::Mat3 &Prop_R_Camera = Camera_T_Prop.inv().linear();
+		const cv::Vec3d &Prop_t_Camera = Camera_T_Prop.inv().translation();
 
-        const cv::Mat &PropImage = virtualProp.Image;
-        const cv::Size propImageSize(PropImage.size());
+		const cv::Mat &PropImage = virtualProp.Image;
+		const cv::Size propImageSize(PropImage.size());
 
-        const cv::Point2d propScale(static_cast<double>(propImageSize.width) / virtualProp.PropSize_m.width, static_cast<double>(propImageSize.height) / virtualProp.PropSize_m.height);
-        const cv::Point2d propPrincipalPoint((static_cast<double>(propImageSize.width) - 1.0) / 2.0, (static_cast<double>(propImageSize.height) - 1.0) / 2.0);
+		const cv::Point2d propScale(static_cast<double>(propImageSize.width) / virtualProp.PropSize_m.width, static_cast<double>(propImageSize.height) / virtualProp.PropSize_m.height);
+		const cv::Point2d propPrincipalPoint((static_cast<double>(propImageSize.width) - 1.0) / 2.0, (static_cast<double>(propImageSize.height) - 1.0) / 2.0);
 
-        cv::Mat CameraPerspective = cv::Mat::zeros(cameraProperties.Resolution.height, cameraProperties.Resolution.width, CV_8UC1);
+		cv::Mat CameraPerspective = cv::Mat::zeros(cameraProperties.Resolution.height, cameraProperties.Resolution.width, CV_8UC1);
 
-        std::vector<int> IterationsX, IterationsY;
-        ComputePerspectiveIterationRange(propImageSize, propScale, Camera_T_Prop, IterationsX, IterationsY);
+		std::vector<int> IterationsX, IterationsY;
+		ComputePerspectiveIterationRange(propImageSize, propScale, Camera_T_Prop, IterationsX, IterationsY);
 
-        std::for_each(std::execution::par_unseq, IterationsY.begin(), IterationsY.end(), [IterationsX, Prop_R_Camera, Prop_t_Camera, Camera_T_Prop, propPrincipalPoint, propScale, &CameraPerspective, propImageSize, PropImage, this](auto&& y)
-        {
-            std::for_each(std::execution::par_unseq, IterationsX.begin(), IterationsX.end(), [y, Prop_R_Camera, Prop_t_Camera, Camera_T_Prop, propPrincipalPoint, propScale, &CameraPerspective, propImageSize, PropImage, this](auto&& x)
-            {
-                const cv::Point2d &cameraNormalizedDirection = this->UndistortPoint(cv::Point2d(x, y));
+		std::for_each(std::execution::par_unseq, IterationsY.begin(), IterationsY.end(), [IterationsX, Prop_R_Camera, Prop_t_Camera, Camera_T_Prop, propPrincipalPoint, propScale, &CameraPerspective, propImageSize, PropImage, this](auto&& y)
+		{
+			std::for_each(std::execution::par_unseq, IterationsX.begin(), IterationsX.end(), [y, Prop_R_Camera, Prop_t_Camera, Camera_T_Prop, propPrincipalPoint, propScale, &CameraPerspective, propImageSize, PropImage, this](auto&& x)
+			{
+				const cv::Point2d &cameraNormalizedDirection = this->UndistortPoint(cv::Point2d(x, y));
 
-                const cv::Point3d cameraRay(cameraNormalizedDirection.x, cameraNormalizedDirection.y, 1.0);
+				const cv::Point3d cameraRay(cameraNormalizedDirection.x, cameraNormalizedDirection.y, 1.0);
 
-                const cv::Point2d &propRay = MatrixUtilities::Normalize(Prop_R_Camera * cameraRay);
+				const cv::Point2d &propRay = MatrixUtilities::Normalize(Prop_R_Camera * cameraRay);
 
-                const cv::Point3d propPoint(Prop_t_Camera[0] - propRay.x * Prop_t_Camera[2], Prop_t_Camera[1] - propRay.y * Prop_t_Camera[2], 0.0);
+				const cv::Point3d propPoint(Prop_t_Camera[0] - propRay.x * Prop_t_Camera[2], Prop_t_Camera[1] - propRay.y * Prop_t_Camera[2], 0.0);
 
-                const cv::Point3d &cameraPoint = Camera_T_Prop * propPoint;
+				const cv::Point3d &cameraPoint = Camera_T_Prop * propPoint;
 
-                // Arbitrarily set the camera clipping plance to 100mm
-                if(cameraPoint.z <= 0.1) return;
+				// Arbitrarily set the camera clipping plance to 100mm
+				if (cameraPoint.z <= 0.1) return;
 
-                const cv::Point2d propPointPx(propPrincipalPoint.x + propPoint.x * propScale.x, propPrincipalPoint.y + propPoint.y * propScale.y);
+				const cv::Point2d propPointPx(propPrincipalPoint.x + propPoint.x * propScale.x, propPrincipalPoint.y + propPoint.y * propScale.y);
 
-                if (propPointPx.x <= -0.5 || propPointPx.x >= propImageSize.width - 0.5 || propPointPx.y <= -0.5 || propPointPx.y >= propImageSize.height - 0.5) return;
+				if (propPointPx.x <= -0.5 || propPointPx.x >= propImageSize.width - 0.5 || propPointPx.y <= -0.5 || propPointPx.y >= propImageSize.height - 0.5) return;
 
-                // Currently only supports projection of 8 bit prop image.
-                CameraPerspective.at<uchar>(y, x) = MatrixUtilities::BilinearInterpolate(PropImage, propPointPx);
-            });
-        });
+				// Currently only supports projection of 8 bit prop image.
+				CameraPerspective.at<uchar>(y, x) = MatrixUtilities::BilinearInterpolate(PropImage, propPointPx);
+			});
+		});
 
-        if (!AddCameraNoise) return CameraPerspective;
+		if (!AddCameraNoise) return CameraPerspective;
 
 		return SimulateCameraNoise(CameraPerspective);
 	}
@@ -192,32 +192,32 @@ namespace Vcw
 			const cv::Point3d propPointLeft((0.0 - propPrincipalPoint.x) / PropScale.x, ((double)k - propPrincipalPoint.y) / PropScale.y, 0.0);
 			const cv::Point3d propPointRight(((PropImageSize.width - 1.0) - propPrincipalPoint.x) / PropScale.x, ((double)k - propPrincipalPoint.y) / PropScale.y, 0.0);
 
-            const cv::Point3d &cameraPointLeft = Camera_T_Prop * propPointLeft;
-            const cv::Point3d &cameraPointRight = Camera_T_Prop * propPointRight;
+			const cv::Point3d &cameraPointLeft = Camera_T_Prop * propPointLeft;
+			const cv::Point3d &cameraPointRight = Camera_T_Prop * propPointRight;
 
-            const cv::Point2d &cameraPointLeft_px = DistortPoint(cameraPointLeft);
-            const cv::Point2d &cameraPointRight_px = DistortPoint(cameraPointRight);
+			const cv::Point2d &cameraPointLeft_px = DistortPoint(cameraPointLeft);
+			const cv::Point2d &cameraPointRight_px = DistortPoint(cameraPointRight);
 
-            cameraPerspectiveLimits[k + 2 * PropImageSize.width - 1] = cameraPointLeft_px;
-            cameraPerspectiveLimits[k + 2 * PropImageSize.width + PropImageSize.height - 3] = cameraPointRight_px;
-        }
+			cameraPerspectiveLimits[k + 2 * PropImageSize.width - 1] = cameraPointLeft_px;
+			cameraPerspectiveLimits[k + 2 * PropImageSize.width + PropImageSize.height - 3] = cameraPointRight_px;
+		}
 
-        /*
-        for(int k=0; k< cameraPerspectiveLimits.size();k++)
-        {
-            std::cout << cameraPerspectiveLimits[k] << "\n";
-        }
-        */
+		/*
+		for(int k=0; k< cameraPerspectiveLimits.size();k++)
+		{
+			std::cout << cameraPerspectiveLimits[k] << "\n";
+		}
+		*/
 
-        decltype(cameraPerspectiveLimits)::iterator minX, maxX, minY, maxY;
-        std::tie(minX, maxX) = std::minmax_element(begin(cameraPerspectiveLimits), std::end(cameraPerspectiveLimits), [](cv::Point2d const& p0, cv::Point2d const& p1) {return p0.x < p1.x; });
-        std::tie(minY, maxY) = std::minmax_element(begin(cameraPerspectiveLimits), std::end(cameraPerspectiveLimits), [](cv::Point2d const& p0, cv::Point2d const& p1) {return p0.y < p1.y; });
+		decltype(cameraPerspectiveLimits)::iterator minX, maxX, minY, maxY;
+		std::tie(minX, maxX) = std::minmax_element(begin(cameraPerspectiveLimits), std::end(cameraPerspectiveLimits), [](cv::Point2d const& p0, cv::Point2d const& p1) {return p0.x < p1.x; });
+		std::tie(minY, maxY) = std::minmax_element(begin(cameraPerspectiveLimits), std::end(cameraPerspectiveLimits), [](cv::Point2d const& p0, cv::Point2d const& p1) {return p0.y < p1.y; });
 
-        const cv::Range RangeX(cv::max(0, (int)floor(minX->x)), cv::min(cameraProperties.Resolution.width - 1, (int)ceil(maxX->x)));
-        const cv::Range RangeY(cv::max(0, (int)floor(minY->y)), cv::min(cameraProperties.Resolution.height - 1, (int)ceil(maxY->y)));
+		const cv::Range RangeX(cv::max(0, (int)floor(minX->x)), cv::min(cameraProperties.Resolution.width - 1, (int)ceil(maxX->x)));
+		const cv::Range RangeY(cv::max(0, (int)floor(minY->y)), cv::min(cameraProperties.Resolution.height - 1, (int)ceil(maxY->y)));
 
-        if (RangeX.size() < 0) return;
-        if (RangeY.size() < 0) return;
+		if (RangeX.size() < 0) return;
+		if (RangeY.size() < 0) return;
 
 		OutIterationsX = std::vector<int>(RangeX.size() + 1);
 		OutIterationsY = std::vector<int>(RangeY.size() + 1);
