@@ -168,6 +168,10 @@ namespace Vcw
 
 	void VirtualCamera::ComputePerspectiveIterationRange(const cv::Size &PropImageSize, const cv::Point2d &PropScale, const cv::Affine3d &Camera_T_Prop, std::vector<int> &OutIterationsX, std::vector<int> &OutIterationsY) const
 	{
+		// The intention is to figure out if there are sections surrounding the prop target where rays casted from the camera will not hit anything.
+		// This is done by taking the border pixel coordinates of the prop target, projecting them to the cameras coordinate system, and finding the 
+		// bounding region of these projections. The smallest rectangle that bounds this region becomes the iteration range for ray casting.
+
 		const cv::Point2d propPrincipalPoint((static_cast<double>(PropImageSize.width) - 1.0) / 2.0, (static_cast<double>(PropImageSize.height) - 1.0) / 2.0);
 
 		std::vector<cv::Point2d> cameraPerspectiveLimits(PropImageSize.width * 2 + (PropImageSize.height - 2) * 2);
@@ -185,8 +189,6 @@ namespace Vcw
 
 			cameraPerspectiveLimits[k] = cameraPointTop_px;
 			cameraPerspectiveLimits[k + PropImageSize.width] = cameraPointBottom_px;
-
-			//std::cout << cameraPointTop << ", " <<  cameraPointBottom << "\n";
 		}
 
 		for (int k = 1; k < PropImageSize.height - 1; k++)
@@ -202,16 +204,7 @@ namespace Vcw
 
 			cameraPerspectiveLimits[k + 2 * PropImageSize.width - 1] = cameraPointLeft_px;
 			cameraPerspectiveLimits[k + 2 * PropImageSize.width + PropImageSize.height - 3] = cameraPointRight_px;
-
-			//std::cout << cameraPointLeft << ", " << cameraPointRight << "\n";
 		}
-
-		/*
-		for (int k = 0; k < cameraPerspectiveLimits.size(); k++)
-		{
-			std::cout << cameraPerspectiveLimits[k] << "\n";
-		}
-		*/
 
 		decltype(cameraPerspectiveLimits)::iterator minX, maxX, minY, maxY;
 		std::tie(minX, maxX) = std::minmax_element(begin(cameraPerspectiveLimits), std::end(cameraPerspectiveLimits), [](cv::Point2d const& p0, cv::Point2d const& p1) {return p0.x < p1.x; });
@@ -219,10 +212,6 @@ namespace Vcw
 
 		const cv::Range RangeX(cv::max(0.0, floor(minX->x)), cv::min(cameraProperties.Resolution.width - 1.0, ceil(maxX->x)));
 		const cv::Range RangeY(cv::max(0.0, floor(minY->y)), cv::min(cameraProperties.Resolution.height - 1.0, ceil(maxY->y)));
-
-		//std::cout << minX->x << ", " << maxX->x << ", " << minY->y << ", " << maxY->y << "\n";
-
-		//std::cout << RangeX.start << ", " << RangeX.end << ", " << RangeY.start << ", " << RangeY.end << "\n";
 
 		if (RangeX.size() < 0) return;
 		if (RangeY.size() < 0) return;
