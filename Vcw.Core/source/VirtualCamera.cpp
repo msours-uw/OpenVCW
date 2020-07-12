@@ -109,13 +109,13 @@ namespace Vcw
 		// Only supports 8 or 16 bit images;
 		const int imageBitDepth = Image.depth() == 0 || Image.depth() == 1 ? 8 : 16;
 
-		PoissonDistribution poissonDistribution(cameraProperties.PhotonsPerPixel);
-
 		std::vector<float> shotNoise(Image.rows * Image.cols, 0.0f);
 
 		// Only add Shot Noise if camera perspective image has non-zero intensities
 		if (MaxIntensityToPhotonsPP > 0.0)
 		{
+			PoissonDistribution poissonDistribution(cameraProperties.PhotonsPerPixel);
+
 			if (imageBitDepth == 8)
 			{
 				for (int k = 0; k < shotNoise.size(); k++)
