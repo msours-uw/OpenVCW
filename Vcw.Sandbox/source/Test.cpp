@@ -155,48 +155,41 @@ int TestMultipleCameraPerspectives()
     return 0;
 }
 
-int main()
+void TestSingleCameraPerspective()
 {
-    TestMultipleCameraPerspectives();
+    const cv::Size cameraResolution(1000.0, 1000.0);
+    const cv::Point2d cameraPrincipalPoint(502.111525255, 494.946008135);
+    const cv::Point2d cameraFocalLength(892.64534652, 892.71219429);
+    const std::vector<double> cameraDistortionCoefficients(std::vector<double>({ -0.3184124974828117 , 0.1655891487212314, -0.00017802041075148632, 0.00017411575646864198, -0.056445932029310308 }));
 
-	return 0;
+    const cv::Affine3d &Room_T_Camera0 = Vcw::MatrixUtilities::CreateAffineTransform(4.191 * ArcminToRads, -603.286 * ArcminToRads, 0.673 * ArcminToRads, -0.053, -0.042, 0.0003);
+
+    const Vcw::CameraProperties cameraProperties(cameraResolution, cameraPrincipalPoint, cameraFocalLength, cameraDistortionCoefficients);
+
+    // Position four cameras within the world, all with reference to the same point. All cameras are set to have the same intrinsic parameters
+    Vcw::VirtualCamera virtualCamera(cameraProperties, Room_T_Camera0);
+
+    const cv::Mat &PropImage = cv::imread("CharucoGrid.png", cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+
+    const double propWidth = 0.75;
+    const double propHeight = 0.75;
+
+    const cv::Size2d propSize(propWidth, propHeight);
+
+    double propDistance = 0.5;
+    const cv::Affine3d &Room_T_Prop = Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance);
+
+    const Vcw::VirtualProp virtualProp(PropImage, propSize, Room_T_Prop);
+
+    const cv::Mat &cameraPerspective = virtualCamera.ComputeCameraPerspectiveOfProp(virtualProp);
+
+    cv::imwrite("Perspective.png", cameraPerspective);
 }
 
+int main()
+{
+    TestSingleCameraPerspective();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return 0;
+}
 

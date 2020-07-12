@@ -16,7 +16,7 @@ namespace Vcw
 
 		static cv::Affine3d CreateAffineTransform(const double Rx, const double Ry, const double Rz, const double Tx, const double Ty, const double Tz);
 
-		static cv::Point2d Normalize(const cv::Point3d &Point);
+        static cv::Point2d Normalize(const cv::Point3d &Point);
 
 	private:
 
