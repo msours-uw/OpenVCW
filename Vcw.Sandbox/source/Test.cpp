@@ -176,7 +176,7 @@ void TestSingleCameraPerspective()
 
     const cv::Size2d propSize(propWidth, propHeight);
 
-    double propDistance = 0.5;
+    double propDistance = -0.01;
     const cv::Affine3d &Room_T_Prop = Vcw::MatrixUtilities::CreateAffineTransform(-25.0 * DegToRads, -25.0 * DegToRads, 0, 0, 0, propDistance);
 
     const Vcw::VirtualProp virtualProp(PropImage, propSize, Room_T_Prop);
