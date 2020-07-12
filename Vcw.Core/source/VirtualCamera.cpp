@@ -105,33 +105,37 @@ namespace Vcw
 		// by tweaking Camera Properties until the desired affect is observed
 
 		const double MaxIntensityToPhotonsPP = Max0 / cameraProperties.PhotonsPerPixel;
-
+		
 		// Only supports 8 or 16 bit images;
 		const int imageBitDepth = Image.depth() == 0 || Image.depth() == 1 ? 8 : 16;
 
 		PoissonDistribution poissonDistribution(cameraProperties.PhotonsPerPixel);
 
-		std::vector<float> shotNoise(Image.rows * Image.cols);
+		std::vector<float> shotNoise(Image.rows * Image.cols, 0.0f);
 
-		if (imageBitDepth == 8)
+		// Only add Shot Noise if camera perspective image has non-zero intensities
+		if (MaxIntensityToPhotonsPP > 0.0)
 		{
-			for (int k = 0; k < shotNoise.size(); k++)
+			if (imageBitDepth == 8)
 			{
-				const double Lambda = Image.data[k] / MaxIntensityToPhotonsPP;
-				shotNoise[k] = (float)poissonDistribution.GenerateDouble(Lambda) * cameraProperties.QuantumEfficiency;
+				for (int k = 0; k < shotNoise.size(); k++)
+				{
+					const double Lambda = Image.data[k] / MaxIntensityToPhotonsPP;
+					shotNoise[k] = (float)poissonDistribution.GenerateDouble(Lambda) * cameraProperties.QuantumEfficiency;
+				}
 			}
-		}
-		else
-		{
-			int j = 0;
-			for (int k = 0; k < shotNoise.size(); k++)
+			else
 			{
-				uint16_t Value = ((uint16_t)Image.data[j + 1] << 8) | ((uint16_t)Image.data[j]);
+				int j = 0;
+				for (int k = 0; k < shotNoise.size(); k++)
+				{
+					uint16_t Value = ((uint16_t)Image.data[j + 1] << 8) | ((uint16_t)Image.data[j]);
 
-				const double Lambda = Value / MaxIntensityToPhotonsPP;
-				shotNoise[k] = (float)poissonDistribution.GenerateDouble(Lambda) * cameraProperties.QuantumEfficiency;
+					const double Lambda = Value / MaxIntensityToPhotonsPP;
+					shotNoise[k] = (float)poissonDistribution.GenerateDouble(Lambda) * cameraProperties.QuantumEfficiency;
 
-				j += 2;
+					j += 2;
+				}
 			}
 		}
 
